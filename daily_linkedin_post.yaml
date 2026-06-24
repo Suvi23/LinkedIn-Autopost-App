@@ -1,0 +1,33 @@
+name: Daily LinkedIn Post Bot
+
+on:
+  schedule:
+    # This runs at 04:00 UTC (9:30 AM IST) every day
+    - cron: '0 4 * * *'
+  workflow_dispatch: # This allows you to run it manually anytime for testing
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run LinkedIn Bot
+        env:
+          # This maps your GitHub Secrets to Environment Variables
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_ID: ${{ secrets.LINKEDIN_PERSON_ID }}
+          # Add your AI API keys here too
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} 
+        run: python main.py

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkedIn Content Generator</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>📝</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/main.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="/" class="logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="6" fill="#0a66c2"/>
+        <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle"
+              fill="white" font-family="Inter,sans-serif" font-weight="700" font-size="18">in</text>
+      </svg>
+      Content Studio
+    </a>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="badge" id="linkedinStatus">🔌 LinkedIn: Disconnected</span>
+      <span class="badge">🔥 Groq AI</span>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="container">
+
+    <!-- Hero -->
+    <div class="hero">
+      <h1>Turn any topic into LinkedIn gold</h1>
+      <p>Research the web, extract insights &amp; generate engaging posts, carousels or articles — powered by Groq AI.</p>
+    </div>
+
+    <!-- Form -->
+    <div class="form-card" id="formCard">
+      <form id="genForm" autocomplete="off">
+        <div class="form-row">
+          <label for="topic">🎯 Topic <span class="hint">— what do you want to talk about?</span></label>
+          <input type="text" id="topic" name="topic" placeholder="e.g. AI in healthcare, remote work, personal branding..." required>
+        </div>
+        <div class="row-duo">
+          <div class="form-row">
+            <label for="style">🎨 Style / Tone</label>
+            <select id="style" name="style">
+              <option value="professional">Professional &amp; data-driven</option>
+              <option value="storytelling">Storytelling &amp; personal</option>
+              <option value="casual">Casual &amp; relatable</option>
+              <option value="educational">Educational / step-by-step</option>
+              <option value="inspiring">Inspiring &amp; motivational</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="contentType">📄 Format</label>
+            <select id="contentType" name="contentType">
+              <option value="post">LinkedIn Post</option>
+              <option value="carousel">Carousel (5-7 slides)</option>
+              <option value="article">LinkedIn Article</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary" id="generateBtn">
+          <span id="btnLabel">✨ Generate Content</span>
+          <span id="btnSpinner" class="spinner" style="display:none"></span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Trending Suggestions -->
+    <div class="trending-section" id="trendingSection" style="display:none;">
+      <div class="trending-header">
+        <h3>🔥 Trending &amp; Related Topics</h3>
+        <p class="subtitle">Click any topic to auto-fill and generate content instantly.</p>
+      </div>
+      <div class="trending-list" id="trendingList"></div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingOverlay" style="display:none; text-align:center; padding: 60px 20px;">
+      <div style="width:48px;height:48px;border:4px solid #e0e4e8;border-top-color:#0a66c2;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 20px;"></div>
+      <p style="color:var(--text-muted);font-size:1.1rem;"><strong>Researching &amp; writing...</strong><br>This usually takes 20-40 seconds.</p>
+    </div>
+
+    <!-- Results -->
+    <div class="results" id="results">
+      <div class="result-tabs" id="tabBar">
+        <button class="tab-btn active" data-tab="content">📝 LinkedIn Content</button>
+        <button class="tab-btn" data-tab="research">📋 Research Brief</button>
+        <button class="tab-btn" data-tab="sources">🔗 Sources</button>
+      </div>
+
+      <!-- Tab: Content -->
+      <div class="tab-panel active" id="panelContent">
+        <div class="content-card">
+          <div class="action-bar">
+            <div class="copy-wrap">
+              <button class="btn-copy" id="copyContentBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <button class="btn-linkedin-post" id="postToLinkedInBtn" style="display:none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              Post to LinkedIn
+            </button>
+          </div>
+          <h2>📢 Generated Content</h2>
+          <p class="subtitle" id="contentSubtitle">Ready to post - tweak as you like before publishing.</p>
+          <div class="body" id="contentBody"></div>
+          <div id="postStatus" style="margin-top:16px;"></div>
+        </div>
+      </div>
+
+      <!-- Tab: Research -->
+      <div class="tab-panel" id="panelResearch">
+        <div class="content-card">
+          <div class="copy-wrap">
+            <button class="btn-copy" id="copyResearchBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <h2>📋 Research Insights</h2>
+          <p class="subtitle">Key statistics, facts, and insights extracted from web sources.</p>
+          <div id="researchBody"></div>
+        </div>
+      </div>
+
+      <!-- Tab: Sources -->
+      <div class="tab-panel" id="panelSources">
+        <div class="content-card">
+          <h2>🔗 Sources</h2>
+          <p class="subtitle">Web pages referenced during research.</p>
+          <ul class="snippets-list" id="sourcesList"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    Built with ❤️ using <a href="https://groq.com" target="_blank">Groq</a> &amp; <a href="https://flask.palletsprojects.com" target="_blank">Flask</a> &nbsp;·&nbsp; <a href="/auth/linkedin/login" id="linkedinConnectLink">Connect LinkedIn</a>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    (function () {
+      'use strict';
+
+      const form = document.getElementById('genForm');
+      const topicInput = document.getElementById('topic');
+      const styleSelect = document.getElementById('style');
+      const typeSelect = document.getElementById('contentType');
+      const generateBtn = document.getElementById('generateBtn');
+      const btnLabel = document.getElementById('btnLabel');
+      const btnSpinner = document.getElementById('btnSpinner');
+      const overlay = document.getElementById('loadingOverlay');
+      const results = document.getElementById('results');
+      const formCard = document.getElementById('formCard');
+      const contentBody = document.getElementById('contentBody');
+      const researchBody = document.getElementById('researchBody');
+      const sourcesList = document.getElementById('sourcesList');
+      const trendingSection = document.getElementById('trendingSection');
+      const trendingList = document.getElementById('trendingList');
+      const postBtn = document.getElementById('postToLinkedInBtn');
+      const postStatus = document.getElementById('postStatus');
+      const linkedinStatus = document.getElementById('linkedinStatus');
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const panels = {
+        content: document.getElementById('panelContent'),
+        research: document.getElementById('panelResearch'),
+        sources: document.getElementById('panelSources')
+      };
+
+      let generatedContent = '';
+
+      // Check LinkedIn connection
+      fetch('/api/linkedin/status')
+        .then(r => r.json())
+        .then(d => {
+          if (d.connected) {
+            linkedinStatus.textContent = '\ud83d\udd17 LinkedIn: Connected as ' + d.name;
+            linkedinStatus.style.background = '#e8f5e9';
+            linkedinStatus.style.color = '#2e7d32';
+          }
+        })
+        .catch(() => {});
+
+      // Trending suggestions on typing
+      let debounceTimer;
+      topicInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        var t = topicInput.value.trim();
+        if (t.length < 3) { trendingSection.style.display = 'none'; return; }
+        debounceTimer = setTimeout(function() { fetchTrending(t); }, 600);
+      });
+
+      async function fetchTrending(topic) {
+        try {
+          var r = await fetch('/api/trending', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ topic: topic })
+          });
+          var d = await r.json();
+          if (d.suggestions && d.suggestions.length > 0) {
+            renderTrending(d.suggestions);
+            trendingSection.style.display = 'block';
+          } else {
+            trendingSection.style.display = 'none';
+          }
+        } catch(e) { trendingSection.style.display = 'none'; }
+      }
+
+      function renderTrending(suggestions) {
+        trendingList.innerHTML = '';
+        suggestions.forEach(function(s) {
+          var chip = document.createElement('button');
+          chip.className = 'trending-chip';
+          chip.textContent = s;
+          chip.addEventListener('click', function() {
+            var t = s.split(':')[0].split('\u2014')[0].trim();
+            if (t.length > 60) t = t.substring(0, 60);
+            topicInput.value = t;
+            trendingSection.style.display = 'none';
+            setTimeout(function() { form.dispatchEvent(new Event('submit')); }, 300);
+          });
+          trendingList.appendChild(chip);
+        });
+      }
+
+      // Tab switching
+      tabBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          tabBtns.forEach(function(b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          Object.entries(panels).forEach(function(entry) {
+            var key = entry[0], el = entry[1];
+            el.classList.toggle('active', key === btn.dataset.tab);
+          });
+        });
+      });
+
+      // Copy helpers
+      function setupCopy(btnId, sourceEl) {
+        var btn = document.getElementById(btnId);
+        if (!btn) return;
+        btn.addEventListener('click', async function() {
+          var text = sourceEl.textContent;
+          try {
+            await navigator.clipboard.writeText(text);
+            btn.classList.add('copied');
+            var orig = btn.innerHTML;
+            btn.innerHTML = '\u2705 Copied!';
+            setTimeout(function() { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+          } catch(e) {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+          }
+        });
+      }
+      setupCopy('copyContentBtn', contentBody);
+      setupCopy('copyResearchBtn', researchBody);
+
+      function fmt(type) {
+        var map = { post: 'LinkedIn Post', carousel: 'Carousel', article: 'LinkedIn Article' };
+        return map[type] || 'Content';
+      }
+
+      function renderResearch(insights) {
+        var html = '';
+        if (insights.statistics && insights.statistics.length) {
+          html += '<h3>\ud83d\udcca Key Statistics</h3><ul>';
+          insights.statistics.forEach(function(s) { html += '<li>' + s + '</li>'; });
+          html += '</ul>';
+        }
+        if (insights.key_insights && insights.key_insights.length) {
+          html += '<h3>\ud83d\udca1 Key Insights</h3><ul>';
+          insights.key_insights.forEach(function(s) { html += '<li>' + s + '</li>'; });
+          html += '</ul>';
+        }
+        if (insights.total_sources !== undefined) {
+          html += '<p style="color:var(--text-muted);font-size:0.9rem;">\ud83d\udcda ' + insights.total_sources + ' source(s) analysed.</p>';
+        }
+        researchBody.innerHTML = html || '<p>No research insights extracted.</p>';
+      }
+
+      function renderSources(sources) {
+        sourcesList.innerHTML = '';
+        if (!sources || !sources.length) { sourcesList.innerHTML = '<li>No sources found.</li>'; return; }
+        sources.forEach(function(s) {
+          var li = document.createElement('li');
+          li.innerHTML = '<strong>' + s.title + '</strong><br><a href="' + s.url + '" target="_blank">' + s.url + '</a>';
+          sourcesList.appendChild(li);
+        });
+      }
+
+      // Post to LinkedIn
+      postBtn.addEventListener('click', async function() {
+        if (!generatedContent) return;
+        postBtn.disabled = true;
+        postBtn.textContent = '\u23f3 Posting...';
+        postStatus.innerHTML = '';
+        try {
+          var r = await fetch('/api/post-to-linkedin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: generatedContent })
+          });
+          var d = await r.json();
+          if (d.success) {
+            if (d.duplicate) {
+              postStatus.innerHTML = '<div class="post-warning">\ud83d\udd01 ' + d.message + '<br><small>Generate new content to post something different.</small></div>';
+            } else {
+              postStatus.innerHTML = '<div class="post-success">\u2705 ' + d.message + '</div>';
+            }
+          } else if (d.needs_auth) {
+            postStatus.innerHTML = '<div class="post-error">\u26a0\ufe0f ' + d.error + ' <a href="/auth/linkedin/login" style="color:#0a66c2;font-weight:600;">Connect here</a></div>';
+          } else {
+            postStatus.innerHTML = '<div class="post-error">\u274c ' + (d.error || 'Unknown error') + '</div>';
+          }
+        } catch(err) {
+          postStatus.innerHTML = '<div class="post-error">\u274c Network error: ' + err.message + '</div>';
+        } finally {
+          postBtn.disabled = false;
+          postBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg> Post to LinkedIn';
+        }
+      });
+
+      // Form submit
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var t = topicInput.value.trim();
+        if (!t) return;
+        generateBtn.disabled = true;
+        btnLabel.textContent = 'Generating...';
+        btnSpinner.style.display = 'inline-block';
+        results.classList.remove('show');
+        overlay.style.display = 'block';
+        formCard.style.display = 'none';
+        postBtn.style.display = 'none';
+        postStatus.innerHTML = '';
+        try {
+          var r = await fetch('/api/research', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ topic: t, style: styleSelect.value, content_type: typeSelect.value })
+          });
+          var d = await r.json();
+          if (d.error) {
+            contentBody.textContent = '\u26a0\ufe0f ' + d.error;
+            researchBody.innerHTML = '';
+            sourcesList.innerHTML = '';
+          } else {
+            generatedContent = d.content.raw || '';
+            contentBody.textContent = generatedContent;
+            document.getElementById('contentSubtitle').textContent = 'Ready to post - ' + fmt(d.content_type) + ' \u00b7 ' + d.style + ' tone';
+            renderResearch(d.research);
+            renderSources(d.research.sources);
+            postBtn.style.display = 'flex';
+            fetchTrending(t);
+            tabBtns.forEach(function(b) { b.classList.remove('active'); });
+            document.querySelector('[data-tab="content"]').classList.add('active');
+            Object.entries(panels).forEach(function(entry) {
+              var key = entry[0], el = entry[1];
+              el.classList.toggle('active', key === 'content');
+            });
+          }
+          results.classList.add('show');
+        } catch(err) {
+          contentBody.textContent = '\u274c Network error: ' + err.message;
+          results.classList.add('show');
+        } finally {
+          generateBtn.disabled = false;
+          btnLabel.textContent = '\u2728 Generate Content';
+          btnSpinner.style.display = 'none';
+          overlay.style.display = 'none';
+          formCard.style.display = 'block';
+        }
+      });
+
+      // Enter key shortcut
+      topicInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !generateBtn.disabled) {
+          form.dispatchEvent(new Event('submit'));
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

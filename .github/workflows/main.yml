@@ -30,4 +30,4 @@ jobs:
           LINKEDIN_PERSON_ID: ${{ secrets.LINKEDIN_PERSON_ID }}
           # Add your AI API keys here too
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} 
-        run: python main.py
+        run: python app.py

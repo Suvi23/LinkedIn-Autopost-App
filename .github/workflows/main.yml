@@ -29,5 +29,5 @@ jobs:
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
           LINKEDIN_PERSON_ID: ${{ secrets.LINKEDIN_PERSON_ID }}
           # Add your AI API keys here too
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} 
+          GROQ_API_KEY=: ${{ secrets.GROQ_API_KEY }} 
         run: python app.py
